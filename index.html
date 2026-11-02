@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow | Modern To-Do & Task Management</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button id="menuToggleBtn" class="icon-btn" aria-label="Toggle Navigation Sidebar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <div class="brand-title">
+        <span class="brand-icon">✓</span>
+        <span>TaskFlow</span>
+      </div>
+      <button id="mobileThemeToggle" class="icon-btn" aria-label="Toggle Theme">
+        <span class="theme-icon-light">☀️</span>
+        <span class="theme-icon-dark">🌙</span>
+      </button>
+    </header>
+
+    <!-- Sidebar Backdrop for Mobile -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <!-- Sidebar -->
+    <aside id="appSidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-title">
+          <span class="brand-icon">✓</span>
+          <span>TaskFlow</span>
+        </div>
+        <button id="closeSidebarBtn" class="icon-btn mobile-only" aria-label="Close Sidebar">✕</button>
+      </div>
+
+      <!-- Quick Stats Card -->
+      <div class="stats-card">
+        <div class="stats-info">
+          <span class="stats-label">Productivity Today</span>
+          <span id="statsPercentage" class="stats-percentage">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div class="stats-numbers">
+          <span id="statsCompletedCount">0 completed</span>
+          <span id="statsTotalCount">0 total</span>
+        </div>
+      </div>
+
+      <!-- Navigation & Views -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Views</div>
+        <button class="nav-item active" data-view="all">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">All Tasks</span>
+          <span id="badgeAll" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" data-view="today">
+          <span class="nav-icon">⭐</span>
+          <span class="nav-label">Due Today</span>
+          <span id="badgeToday" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" data-view="upcoming">
+          <span class="nav-icon">📅</span>
+          <span class="nav-label">Upcoming</span>
+          <span id="badgeUpcoming" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" data-view="completed">
+          <span class="nav-icon">✅</span>
+          <span class="nav-label">Completed</span>
+          <span id="badgeCompleted" class="nav-badge">0</span>
+        </button>
+
+        <!-- Categories / Lists Section -->
+        <div class="nav-section-header">
+          <span class="nav-section-title">Lists & Categories</span>
+          <button id="addCategoryBtn" class="add-cat-btn" title="Add new custom list">+</button>
+        </div>
+        <div id="categoryNavList" class="category-nav-list">
+          <!-- Dynamically injected categories -->
+        </div>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button id="themeToggleBtn" class="sidebar-action-btn" title="Toggle Theme">
+          <span class="theme-icon-light">☀️ Light Mode</span>
+          <span class="theme-icon-dark">🌙 Dark Mode</span>
+        </button>
+        <div class="data-actions">
+          <button id="exportDataBtn" class="subtle-btn" title="Export tasks to JSON">Backup</button>
+          <button id="importDataBtn" class="subtle-btn" title="Import tasks from JSON">Restore</button>
+          <input type="file" id="importFileInput" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Action Bar -->
+      <section class="top-bar">
+        <div class="search-box">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" placeholder="Search tasks or tags... (Press /)" autocomplete="off">
+          <button id="clearSearchBtn" class="clear-search-btn" title="Clear Search">✕</button>
+        </div>
+
+        <div class="top-controls">
+          <!-- Filter by Priority -->
+          <select id="priorityFilterSelect" class="select-dropdown" aria-label="Filter by Priority">
+            <option value="all">All Priorities</option>
+            <option value="high">🔴 High Priority</option>
+            <option value="medium">🟡 Medium Priority</option>
+            <option value="low">🟢 Low Priority</option>
+          </select>
+
+          <!-- Sort Select -->
+          <select id="sortSelect" class="select-dropdown" aria-label="Sort Tasks">
+            <option value="createdAt-desc">Newest First</option>
+            <option value="createdAt-asc">Oldest First</option>
+            <option value="dueDate-asc">Due Date (Earliest)</option>
+            <option value="priority-desc">Priority (High to Low)</option>
+            <option value="title-asc">Alphabetical (A-Z)</option>
+          </select>
+
+          <!-- New Task Quick Button -->
+          <button id="openNewTaskModalBtn" class="btn btn-primary" title="Create Task (Press N)">
+            <span>+</span>
+            <span class="btn-text">New Task</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- View Header -->
+      <section class="view-header">
+        <div>
+          <h1 id="currentViewTitle" class="view-title">All Tasks</h1>
+          <p id="currentViewSubtitle" class="view-subtitle">Manage, prioritize and accomplish your daily goals</p>
+        </div>
+        <div class="view-actions">
+          <button id="clearCompletedBtn" class="btn btn-ghost" title="Remove all finished tasks">Clear Completed</button>
+        </div>
+      </section>
+
+      <!-- Quick Add Inline Task Bar -->
+      <section class="quick-add-section">
+        <form id="quickAddForm" class="quick-add-form">
+          <div class="quick-add-input-wrapper">
+            <input type="text" id="quickTaskInput" placeholder="Add a new task quickly... (Press Enter)" autocomplete="off">
+          </div>
+          <div class="quick-add-options">
+            <select id="quickPrioritySelect" class="quick-select" aria-label="Quick Priority">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+            <input type="date" id="quickDueDateInput" class="quick-date-input" aria-label="Quick Due Date">
+            <button type="submit" class="btn btn-primary btn-sm">Add</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Tasks List Container -->
+      <section class="tasks-section">
+        <div id="tasksList" class="tasks-list" role="list">
+          <!-- Dynamically populated tasks -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <div class="empty-icon">☕</div>
+          <h3 id="emptyStateTitle">No tasks found</h3>
+          <p id="emptyStateSubtitle">You're all caught up! Create a new task or adjust your filters.</p>
+          <button id="emptyStateActionBtn" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Create First Task</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Task Detail / Edit Modal -->
+  <div id="taskModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 id="modalTitle">Create New Task</h2>
+        <button id="closeModalBtn" class="icon-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="taskForm" class="modal-form">
+        <input type="hidden" id="editTaskId">
+
+        <div class="form-group">
+          <label for="taskTitleInput">Task Title <span class="required">*</span></label>
+          <input type="text" id="taskTitleInput" placeholder="e.g. Design user profile screen" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="taskDescInput">Notes / Description</label>
+          <textarea id="taskDescInput" rows="3" placeholder="Add details, links, or instructions..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskCategorySelect">List / Category</label>
+            <select id="taskCategorySelect" class="select-dropdown">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="taskPrioritySelect">Priority</label>
+            <select id="taskPrioritySelect" class="select-dropdown">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskDueDateInput">Due Date</label>
+            <input type="date" id="taskDueDateInput" class="select-dropdown">
+          </div>
+
+          <div class="form-group">
+            <label for="taskTagInput">Tags (comma separated)</label>
+            <input type="text" id="taskTagInput" placeholder="frontend, urgent, review">
+          </div>
+        </div>
+
+        <!-- Subtasks Checklist Section -->
+        <div class="form-group">
+          <label>Subtasks / Checklist</label>
+          <div class="subtask-input-row">
+            <input type="text" id="newSubtaskInput" placeholder="Add a checklist item...">
+            <button type="button" id="addSubtaskBtn" class="btn btn-secondary btn-sm">+ Add</button>
+          </div>
+          <div id="subtasksContainer" class="subtasks-container">
+            <!-- Dynamic Subtasks -->
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn btn-ghost">Cancel</button>
+          <button type="submit" id="saveTaskBtn" class="btn btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Category Modal -->
+  <div id="categoryModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card modal-sm" role="dialog" aria-labelledby="catModalTitle">
+      <div class="modal-header">
+        <h2 id="catModalTitle">Create New List</h2>
+        <button id="closeCatModalBtn" class="icon-btn" aria-label="Close modal">✕</button>
+      </div>
+      <form id="categoryForm" class="modal-form">
+        <div class="form-group">
+          <label for="categoryNameInput">List Name <span class="required">*</span></label>
+          <input type="text" id="categoryNameInput" placeholder="e.g. Work, Workout, Reading" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Choose Color</label>
+          <div class="color-palette" id="colorPalette">
+            <button type="button" class="color-swatch active" data-color="#3b82f6" style="background: #3b82f6;"></button>
+            <button type="button" class="color-swatch" data-color="#10b981" style="background: #10b981;"></button>
+            <button type="button" class="color-swatch" data-color="#f59e0b" style="background: #f59e0b;"></button>
+            <button type="button" class="color-swatch" data-color="#ec4899" style="background: #ec4899;"></button>
+            <button type="button" class="color-swatch" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
+            <button type="button" class="color-swatch" data-color="#06b6d4" style="background: #06b6d4;"></button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelCatModalBtn" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create List</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="assertive"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
